@@ -35,8 +35,6 @@ set ENCRYPT_ARGS_CMD=CryptoTool.exe -k "%AES_KEY%" -e -s "%PAYLOAD_ARGUMENTS%"
 echo %ENCRYPT_ARGS_CMD%
 for /F %%i in ('%ENCRYPT_ARGS_CMD%') do (set ENCRYPTED_PAYLOAD_ARGS=%%i)
 
-::for /F %%i in (' "%OUT_DIR%CryptoTool.exe" -k "%AES_KEY%" -e -s "%PAYLOAD_ARGUMENTS%" ') do (set ENCRYPTED_PAYLOAD_ARGS=%%i)
-
 echo encrypt arguments: "%ENCRYPTED_PAYLOAD_ARGS%"
 
 cd %~dp0
@@ -59,7 +57,7 @@ echo PostCompile
 
 set BIN_DIR=%OUT_DIR%%APP_NAME%\
 mkdir %BIN_DIR%
-%COPY% %OUT_DIR%AppShell.exe %BIN_DIR%%APP_NAME%
+%COPY% %OUT_DIR%AppShell.exe %BIN_DIR%%APP_NAME%.exe
 %XCOPY% %OUT_DIR%libssl-1_1-x64.dll %BIN_DIR%
 %XCOPY% %OUT_DIR%libcrypto-1_1-x64.dll %BIN_DIR%
 %XCOPY% %ENCRYPTED_PAYLOAD% %BIN_DIR%
