@@ -66,7 +66,7 @@
       <AdditionalDependencies>Crypto.lib;Common.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)payload.dat $(OutDir)  /a /i /y /c
+      <Command>xcopy $(ProjectDir)payload-debug.dat $(OutDir)  /a /i /y /c
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
