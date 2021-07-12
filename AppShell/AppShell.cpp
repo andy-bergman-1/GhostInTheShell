@@ -1,6 +1,9 @@
 ﻿// AppShell.cpp
 //
 
+#include <Windows.h>
+#include <Psapi.h>
+#include <TlHelp32.h>
 #include <iostream>
 #include <string>
 #include <Crypto.h>
@@ -51,8 +54,43 @@ char* makePayloadArgs(int argc, char** argv) {
     return s;
 }
 
-int main(int argc, char **argv)
-{
+#define R_ERROR (-1)
+#define R_NO_EXIST (0)
+#define R_EXIST (1)
+
+int TargetProcessAlive() {
+    char path[MAX_PATH] = { 0 };
+    HANDLE hProc = GetCurrentProcess();
+    DWORD procId = GetCurrentProcessId();
+    ::GetModuleBaseName(hProc, NULL, path, MAX_PATH);
+    CloseHandle(hProc);
+
+    HANDLE hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        std::cerr << "error of snapshot handle" << std::endl;
+        return R_ERROR;
+    }
+
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    if (!::Process32First(hSnapshot, &pe32)) {
+        ::CloseHandle(hSnapshot);
+        return R_ERROR;
+    }
+    do {
+
+        if (pe32.th32ProcessID != procId && strcmp(pe32.szExeFile, path) == 0) {
+            ::CloseHandle(hSnapshot);
+            return R_EXIST;
+        }
+    } while (::Process32Next(hSnapshot, &pe32));
+
+    ::CloseHandle(hSnapshot);
+    return R_NO_EXIST;
+
+}
+
+int StartTargeProcess(int argc, char** argv) {
     LPBYTE lpData = NULL;
     DWORD dwLen = 0;
 
@@ -66,13 +104,34 @@ int main(int argc, char **argv)
         log("failed to load payload %s\n", ENCRYPTED_PAYLOAD);
         return -1;
     }
-
     char* args = makePayloadArgs(argc, argv);
     // log("args: %s\n", args);
-
     MemExec(lpData, dwLen, args);
-
     delete[] args;
     delete[] lpData;
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    BOOL watch = FALSE;
+    if (argc == 2 && strcmp(argv[1], "--watch") == 0) {
+        log("start on watch mode\n");
+        watch = TRUE;
+    }
+
+    StartTargeProcess(argc, argv);
     log(SCREEN_TEXT);
+
+    while (watch)
+    {
+        Sleep(20 * 1000);
+        int r = TargetProcessAlive();
+        if (r == R_NO_EXIST) {
+            log("restarting...\n");
+            StartTargeProcess(argc, argv);
+            log(SCREEN_TEXT);
+        }
+    }
+
 }
