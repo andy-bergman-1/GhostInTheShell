@@ -117,6 +117,7 @@ int main(int argc, char **argv)
     BOOL watch = FALSE;
     if (argc == 2 && strcmp(argv[1], "--watch") == 0) {
         log("start on watch mode\n");
+        argc = 1;
         watch = TRUE;
     }
 
